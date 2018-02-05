@@ -1,0 +1,95 @@
+<!-- Imports polymer -->
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/2.3.1/lib/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="typeahead-input">
+  <template>
+    <style>
+    .typeahead-input {
+      display: inline-block;
+
+      /* custom */
+      margin: 20px;
+    }
+    .typeahead-input__wrapper {
+      position: relative;
+      border: solid 1px black;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+
+      /* custom */
+      padding: 10px;
+      height: 40px;
+      font-size: 30px;
+      font-family: sans-serif;
+    }
+    .typeahead-input__wrapper > * {
+      font-family: inherit;
+      font-size: inherit;
+    }
+    .typeahead-input__input {
+      border: 0;
+      outline: 0;
+    }
+    .typeahead-input__typeahead {
+      position: absolute;
+      pointer-events: none;
+      color: #aaa; /* ghosting color */
+    }
+    .typeahead-input__typeahead * {
+    }
+    .typeahead-input__typeahead b {
+      font-weight: normal;
+      color: initial;
+    }
+    </style>
+    <div class="typeahead-input">
+      <div class="typeahead-input__wrapper">
+        <div class="typeahead-input__typeahead"></div><input class="typeahead-input__input" autofocus="true">
+      </div>
+    </div>
+  </template>
+
+  <!-- Registers custom element -->
+  <script>
+    Polymer({
+      is: 'typeahead-input',
+
+      properties: {
+        textCollections: {
+          type: Array,
+          value: () => []
+        }
+      },
+
+      ready() {
+        let input = this.$$('input')
+        this.listen(input, 'input', '_inputTextChanged')
+
+        this._typeaheadElem = this.$$('.typeahead-input__typeahead')
+      },
+
+      _inputTextChanged(event) {
+        this._typeaheadElem.innerHTML = this._getTypeaheadContent(event.target.value)
+      },
+
+      _getTypeaheadContent(text) {
+        let textCollections = this.textCollections
+        let typeaheadPossible = text.length && textCollections && textCollections.length
+
+        if (typeaheadPossible) {
+          let fullText = textCollections.find((item) => item.startsWith(text))
+
+          if (fullText) {
+            let typeaheadText = fullText.replace(new RegExp(`^${text}`), '')
+            return `<b>${text}</b>${typeaheadText}`
+          }
+        }
+
+        return ''
+      }
+    });
+  </script>
+</dom-module>
